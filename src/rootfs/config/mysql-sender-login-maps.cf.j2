@@ -1,0 +1,5 @@
+hosts = {{ environ('POSTFIX_MYSQL_HOST') }}
+user = {{ environ('POSTFIX_MYSQL_USERNAME') }}
+password = {{ environ('POSTFIX_MYSQL_PASSWORD') }}
+dbname = {{ environ('POSTFIX_MYSQL_DATABASE') }}
+query = SELECT email FROM mail_users WHERE local = '%u' AND domain = '%d' and enabled = true UNION SELECT destination FROM mail_aliases WHERE source_local = '%u' and source_domain = '%d' and enabled = true

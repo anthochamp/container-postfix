@@ -1,0 +1,5 @@
+hosts = {{ environ('POSTFIX_MYSQL_HOST') }}
+user = {{ environ('POSTFIX_MYSQL_USERNAME') }}
+password = {{ environ('POSTFIX_MYSQL_PASSWORD') }}
+dbname = {{ environ('POSTFIX_MYSQL_DATABASE') }}
+query = SELECT 1 FROM mail_users WHERE local = '%u' and domain = '%d' and enabled = true LIMIT 1

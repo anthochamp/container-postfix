@@ -1,0 +1,98 @@
+setuid = stunnel
+setgid = stunnel
+pid = /run/stunnel/stunnel.pid
+
+socket = l:TCP_NODELAY=1
+socket = r:TCP_NODELAY=1
+
+foreground=yes
+syslog=yes
+
+[loopback]
+client = yes
+accept = 127.0.0.1:54321
+connect = 127.0.0.1:54320
+
+{% if environ('POSTFIX_TRANSPORT_LMTP_HOST') | length > 0 and environ('POSTFIX_TRANSPORT_LMTP_TLS') == '1' %}
+[transport_lmtp]
+client = yes
+accept = {{ environ('_POSTFIX_TRANSPORT_LMTP_HOST') }}:{{ environ('_POSTFIX_TRANSPORT_LMTP_PORT') }}
+connect = {{ environ('POSTFIX_TRANSPORT_LMTP_HOST') }}:{{ environ('POSTFIX_TRANSPORT_LMTP_PORT') }}
+
+  {% if environ('POSTFIX_TRANSPORT_LMTP_TLS_CA_FILE') | length > 0 %}
+CAfile = {{ environ('POSTFIX_TRANSPORT_LMTP_TLS_CA_FILE') }}
+  {% else %}
+CApath = /etc/ssl/certs
+  {% endif %}
+
+  {% if environ('POSTFIX_TRANSPORT_LMTP_TLS_CERT_FILE') | length > 0 and environ('POSTFIX_TRANSPORT_LMTP_TLS_CERT_KEY_FILE') | length > 0 %}
+cert = {{ environ('POSTFIX_TRANSPORT_LMTP_TLS_CERT_FILE') }}
+key = {{ environ('POSTFIX_TRANSPORT_LMTP_TLS_CERT_KEY_FILE') }}
+  {% endif %}
+
+verifyChain = {% if environ('POSTFIX_TRANSPORT_LMTP_TLS_SKIP_VERIFY') == '0' %}yes{% else %}no{% endif %}
+
+{% endif %}
+
+{% if environ('POSTFIX_SASL_HOST') | length > 0 and environ('POSTFIX_SASL_TLS') == '1' %}
+[sasl]
+client = yes
+accept = {{ environ('_POSTFIX_SASL_HOST') }}:{{ environ('_POSTFIX_SASL_PORT') }}
+connect = {{ environ('POSTFIX_SASL_HOST') }}:{{ environ('POSTFIX_SASL_PORT') }}
+
+  {% if environ('POSTFIX_SASL_TLS_CA_FILE') | length > 0 %}
+CAfile = {{ environ('POSTFIX_SASL_TLS_CA_FILE') }}
+  {% else %}
+CApath = /etc/ssl/certs
+  {% endif %}
+
+  {% if environ('POSTFIX_SASL_TLS_CERT_FILE') | length > 0 and environ('POSTFIX_SASL_TLS_CERT_KEY_FILE') | length > 0 %}
+cert = {{ environ('POSTFIX_SASL_TLS_CERT_FILE') }}
+key = {{ environ('POSTFIX_SASL_TLS_CERT_KEY_FILE') }}
+  {% endif %}
+
+verifyChain = {% if environ('POSTFIX_SASL_TLS_SKIP_VERIFY') == '0' %}yes{% else %}no{% endif %}
+
+{% endif %}
+
+{% if environ('POSTFIX_RCPT_POLICY_SERVICE_HOST') | length > 0 and environ('POSTFIX_RCPT_POLICY_SERVICE_TLS') == '1' %}
+[rcpt_policy_service]
+client = yes
+accept = {{ environ('_POSTFIX_RCPT_POLICY_SERVICE_HOST') }}:{{ environ('_POSTFIX_RCPT_POLICY_SERVICE_PORT') }}
+connect = {{ environ('POSTFIX_RCPT_POLICY_SERVICE_HOST') }}:{{ environ('POSTFIX_RCPT_POLICY_SERVICE_PORT') }}
+
+  {% if environ('POSTFIX_RCPT_POLICY_SERVICE_TLS_CA_FILE') | length > 0 %}
+CAfile = {{ environ('POSTFIX_RCPT_POLICY_SERVICE_TLS_CA_FILE') }}
+  {% else %}
+CApath = /etc/ssl/certs
+  {% endif %}
+
+  {% if environ('POSTFIX_RCPT_POLICY_SERVICE_TLS_CERT_FILE') | length > 0 and environ('POSTFIX_RCPT_POLICY_SERVICE_TLS_CERT_KEY_FILE') | length > 0 %}
+cert = {{ environ('POSTFIX_RCPT_POLICY_SERVICE_TLS_CERT_FILE') }}
+key = {{ environ('POSTFIX_RCPT_POLICY_SERVICE_TLS_CERT_KEY_FILE') }}
+  {% endif %}
+
+verifyChain = {% if environ('POSTFIX_RCPT_POLICY_SERVICE_TLS_SKIP_VERIFY') == '0' %}yes{% else %}no{% endif %}
+
+{% endif %}
+
+{% if environ('POSTFIX_MILTER_HOST') | length > 0 and environ('POSTFIX_MILTER_TLS') == '1' %}
+[milter]
+client = yes
+accept = {{ environ('_POSTFIX_MILTER_HOST') }}:{{ environ('_POSTFIX_MILTER_PORT') }}
+connect = {{ environ('POSTFIX_MILTER_HOST') }}:{{ environ('POSTFIX_MILTER_PORT') }}
+
+  {% if environ('POSTFIX_MILTER_TLS_CA_FILE') | length > 0 %}
+CAfile = {{ environ('POSTFIX_MILTER_TLS_CA_FILE') }}
+  {% else %}
+CApath = /etc/ssl/certs
+  {% endif %}
+
+  {% if environ('POSTFIX_MILTER_TLS_CERT_FILE') | length > 0 and environ('POSTFIX_MILTER_TLS_CERT_KEY_FILE') | length > 0 %}
+cert = {{ environ('POSTFIX_MILTER_TLS_CERT_FILE') }}
+key = {{ environ('POSTFIX_MILTER_TLS_CERT_KEY_FILE') }}
+  {% endif %}
+
+verifyChain = {% if environ('POSTFIX_MILTER_TLS_SKIP_VERIFY') == '0' %}yes{% else %}no{% endif %}
+
+{% endif %}

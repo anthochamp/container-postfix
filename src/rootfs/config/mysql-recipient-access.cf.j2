@@ -1,0 +1,5 @@
+hosts = {{ environ('POSTFIX_MYSQL_HOST') }}
+user = {{ environ('POSTFIX_MYSQL_USERNAME') }}
+password = {{ environ('POSTFIX_MYSQL_PASSWORD') }}
+dbname = {{ environ('POSTFIX_MYSQL_DATABASE') }}
+query = SELECT COALESCE( (SELECT IF(sendonly = TRUE, 'REJECT', 'OK') FROM mail_users WHERE LOCAL = '%u' AND domain = '%d' AND enabled = TRUE LIMIT 1), 'DUNNO' ) FROM DUAL;
