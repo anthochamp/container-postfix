@@ -1,32 +1,33 @@
 #!/usr/bin/env sh
 set -eu
 
-# shellcheck disable=SC2120
+# shellcheck disable=SC2120,SC3043
 replaceEnvSecrets() {
-  # replaceEnvSecrets 1.0.0
-  local prefix="${1:-}"
+	# replaceEnvSecrets 1.0.0
+	# https://gist.github.com/anthochamp/d4d9537f52e5b6c42f0866dd823a605f
+	local prefix="${1:-}"
 
-  for envSecretName in $(export | awk '{print $2}' | grep -oE '^[^=]+' | grep '__FILE$'); do
-    if [ -z "$prefix" ] || printf '%s' "$envSecretName" | grep "^$prefix" >/dev/null; then
-      local envName
-      envName=$(printf '%s' "$envSecretName" | sed 's/__FILE$//')
+	for envSecretName in $(export | awk '{print $2}' | grep -oE '^[^=]+' | grep '__FILE$'); do
+		if [ -z "$prefix" ] || printf '%s' "$envSecretName" | grep "^$prefix" >/dev/null; then
+			local envName
+			envName=$(printf '%s' "$envSecretName" | sed 's/__FILE$//')
 
-      local filePath
-      filePath=$(eval echo '${'"$envSecretName"':-}')
+			local filePath
+			filePath=$(eval echo '${'"$envSecretName"':-}')
 
-      if [ -n "$filePath" ]; then
-        if [ -f "$filePath" ]; then
-          echo Using content from "$filePath" file for "$envName" environment variable value.
+			if [ -n "$filePath" ]; then
+				if [ -f "$filePath" ]; then
+					echo Using content from "$filePath" file for "$envName" environment variable value.
 
-          export "$envName"="$(cat -A "$filePath")"
-          unset "$envSecretName"
-        else
-          echo ERROR: Environment variable "$envSecretName" is defined but does not point to a regular file. 1>&2
-          exit 1
-        fi
-      fi
-    fi
-  done
+					export "$envName"="$(cat -A "$filePath")"
+					unset "$envSecretName"
+				else
+					echo ERROR: Environment variable "$envSecretName" is defined but does not point to a regular file. 1>&2
+					exit 1
+				fi
+			fi
+		fi
+	done
 }
 
 replaceEnvSecrets POSTFIX_
@@ -66,67 +67,67 @@ export POSTFIX_MILTER_TLS_CERT_FILE="${POSTFIX_MILTER_TLS_CERT_FILE:-}"
 export POSTFIX_MILTER_TLS_CERT_KEY_FILE="${POSTFIX_MILTER_TLS_CERT_KEY_FILE:-}"
 
 if [ -n "$POSTFIX_TRANSPORT_LMTP_HOST" ]; then
-  if [ "$POSTFIX_TRANSPORT_LMTP_TLS" -eq 0 ]; then
-    export POSTFIX_TRANSPORT_LMTP_PORT="${POSTFIX_TRANSPORT_LMTP_PORT:-24}"
+	if [ "$POSTFIX_TRANSPORT_LMTP_TLS" -eq 0 ]; then
+		export POSTFIX_TRANSPORT_LMTP_PORT="${POSTFIX_TRANSPORT_LMTP_PORT:-24}"
 
-    export _POSTFIX_TRANSPORT_LMTP_HOST="$POSTFIX_TRANSPORT_LMTP_HOST"
-    export _POSTFIX_TRANSPORT_LMTP_PORT="$POSTFIX_TRANSPORT_LMTP_PORT"
-  else
-    if [ -z "${POSTFIX_TRANSPORT_LMTP_PORT:-}" ]; then
-      echo "$0": missing POSTFIX_TRANSPORT_LMTP_PORT environment variable
-      exit 1
-    fi
+		export _POSTFIX_TRANSPORT_LMTP_HOST="$POSTFIX_TRANSPORT_LMTP_HOST"
+		export _POSTFIX_TRANSPORT_LMTP_PORT="$POSTFIX_TRANSPORT_LMTP_PORT"
+	else
+		if [ -z "${POSTFIX_TRANSPORT_LMTP_PORT:-}" ]; then
+			echo "$0": missing POSTFIX_TRANSPORT_LMTP_PORT environment variable
+			exit 1
+		fi
 
-    export _POSTFIX_TRANSPORT_LMTP_HOST=127.0.0.20
-    export _POSTFIX_TRANSPORT_LMTP_PORT=10000
-  fi
+		export _POSTFIX_TRANSPORT_LMTP_HOST=127.0.0.20
+		export _POSTFIX_TRANSPORT_LMTP_PORT=10000
+	fi
 fi
 
 if [ -n "$POSTFIX_SASL_HOST" ]; then
-  if [ -z "${POSTFIX_SASL_PORT:-}" ]; then
-    echo "$0": missing POSTFIX_SASL_PORT environment variable
-    exit 1
-  fi
+	if [ -z "${POSTFIX_SASL_PORT:-}" ]; then
+		echo "$0": missing POSTFIX_SASL_PORT environment variable
+		exit 1
+	fi
 
-  if [ "$POSTFIX_SASL_TLS" -eq 0 ]; then
-    export _POSTFIX_SASL_HOST="$POSTFIX_SASL_HOST"
-    export _POSTFIX_SASL_PORT="$POSTFIX_SASL_PORT"
-  else
-    export _POSTFIX_SASL_HOST=127.0.0.20
-    export _POSTFIX_SASL_PORT=10001
-  fi
+	if [ "$POSTFIX_SASL_TLS" -eq 0 ]; then
+		export _POSTFIX_SASL_HOST="$POSTFIX_SASL_HOST"
+		export _POSTFIX_SASL_PORT="$POSTFIX_SASL_PORT"
+	else
+		export _POSTFIX_SASL_HOST=127.0.0.20
+		export _POSTFIX_SASL_PORT=10001
+	fi
 fi
 
 if [ -n "$POSTFIX_RCPT_POLICY_SERVICE_HOST" ]; then
-  if [ -z "${POSTFIX_RCPT_POLICY_SERVICE_PORT:-}" ]; then
-    echo "$0": missing POSTFIX_RCPT_POLICY_SERVICE_PORT environment variable
-    exit 1
-  fi
+	if [ -z "${POSTFIX_RCPT_POLICY_SERVICE_PORT:-}" ]; then
+		echo "$0": missing POSTFIX_RCPT_POLICY_SERVICE_PORT environment variable
+		exit 1
+	fi
 
-  if [ "$POSTFIX_RCPT_POLICY_SERVICE_TLS" -eq 0 ]; then
-    export _POSTFIX_RCPT_POLICY_SERVICE_HOST="$POSTFIX_RCPT_POLICY_SERVICE_HOST"
-    export _POSTFIX_RCPT_POLICY_SERVICE_PORT="$POSTFIX_RCPT_POLICY_SERVICE_PORT"
-  else
-    export _POSTFIX_RCPT_POLICY_SERVICE_HOST=127.0.0.20
-    export _POSTFIX_RCPT_POLICY_SERVICE_PORT=10002
-  fi
+	if [ "$POSTFIX_RCPT_POLICY_SERVICE_TLS" -eq 0 ]; then
+		export _POSTFIX_RCPT_POLICY_SERVICE_HOST="$POSTFIX_RCPT_POLICY_SERVICE_HOST"
+		export _POSTFIX_RCPT_POLICY_SERVICE_PORT="$POSTFIX_RCPT_POLICY_SERVICE_PORT"
+	else
+		export _POSTFIX_RCPT_POLICY_SERVICE_HOST=127.0.0.20
+		export _POSTFIX_RCPT_POLICY_SERVICE_PORT=10002
+	fi
 fi
 
 if [ -n "$POSTFIX_MILTER_HOST" ]; then
-  if [ "$POSTFIX_MILTER_TLS" -eq 0 ]; then
-    export POSTFIX_MILTER_PORT="${POSTFIX_MILTER_PORT:-11332}"
+	if [ "$POSTFIX_MILTER_TLS" -eq 0 ]; then
+		export POSTFIX_MILTER_PORT="${POSTFIX_MILTER_PORT:-11332}"
 
-    export _POSTFIX_MILTER_HOST="$POSTFIX_MILTER_HOST"
-    export _POSTFIX_MILTER_PORT="$POSTFIX_MILTER_PORT"
-  else
-    if [ -z "${POSTFIX_MILTER_PORT:-}" ]; then
-      echo "$0": missing POSTFIX_MILTER_PORT environment variable
-      exit 1
-    fi
+		export _POSTFIX_MILTER_HOST="$POSTFIX_MILTER_HOST"
+		export _POSTFIX_MILTER_PORT="$POSTFIX_MILTER_PORT"
+	else
+		if [ -z "${POSTFIX_MILTER_PORT:-}" ]; then
+			echo "$0": missing POSTFIX_MILTER_PORT environment variable
+			exit 1
+		fi
 
-    export _POSTFIX_MILTER_HOST=127.0.0.20
-    export _POSTFIX_MILTER_PORT=10003
-  fi
+		export _POSTFIX_MILTER_HOST=127.0.0.20
+		export _POSTFIX_MILTER_PORT=10003
+	fi
 fi
 
 j2Templates="
@@ -140,11 +141,11 @@ j2Templates="
 "
 
 for file in $j2Templates; do
-  jinja2 -o "$file" "$file.j2"
+	jinja2 -o "$file" "$file.j2"
 
-  # can't use --reference with alpine
-  chmod "$(stat -c '%a' "$file.j2")" "$file"
-  chown "$(stat -c '%U:%G' "$file.j2")" "$file"
+	# can't use --reference with alpine
+	chmod "$(stat -c '%a' "$file.j2")" "$file"
+	chown "$(stat -c '%U:%G' "$file.j2")" "$file"
 done
 
 exec "$@"
