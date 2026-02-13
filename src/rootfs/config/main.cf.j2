@@ -819,6 +819,26 @@ mua_recipient_restrictions=
     check_recipient_access mysql:/etc/postfix/mysql-recipient-access.cf,
     check_policy_service inet:{{ environ('_POSTFIX_RCPT_POLICY_SERVICE_HOST') }}:{{ environ('_POSTFIX_RCPT_POLICY_SERVICE_PORT') }}
 
+{% if environ('POSTFIX_SENDER_CANONICAL_MAP_HOST') %}
+#
+# Sender canonical maps via socketmap (e.g., SRS forward encoding)
+#
+# http://www.postfix.org/postconf.5.html#sender_canonical_maps
+sender_canonical_maps = socketmap:inet:{{ environ('_POSTFIX_SENDER_CANONICAL_MAP_HOST') }}:{{
+environ('_POSTFIX_SENDER_CANONICAL_MAP_PORT') }}:{{ environ('POSTFIX_SENDER_CANONICAL_MAP_TABLE') }}
+sender_canonical_classes = envelope_sender
+{% endif %}
+
+{% if environ('POSTFIX_RECIPIENT_CANONICAL_MAP_HOST') %}
+#
+# Recipient canonical maps via socketmap (e.g., SRS reverse decoding)
+#
+# http://www.postfix.org/postconf.5.html#recipient_canonical_maps
+recipient_canonical_maps = socketmap:inet:{{ environ('_POSTFIX_RECIPIENT_CANONICAL_MAP_HOST') }}:{{
+environ('_POSTFIX_RECIPIENT_CANONICAL_MAP_PORT') }}:{{ environ('POSTFIX_RECIPIENT_CANONICAL_MAP_TABLE') }}
+recipient_canonical_classes = envelope_recipient,header_recipient
+{% endif %}
+
 #
 # Miscellaneous
 #
