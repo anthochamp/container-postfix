@@ -2,4 +2,4 @@ hosts = {{ environ('POSTFIX_MYSQL_HOST') }}
 user = {{ environ('POSTFIX_MYSQL_USERNAME') }}
 password = {{ environ('POSTFIX_MYSQL_PASSWORD') }}
 dbname = {{ environ('POSTFIX_MYSQL_DATABASE') }}
-query = SELECT destination FROM mail_aliases WHERE source_local = '%u' and source_domain = '%d' and enabled = true;
+query = SELECT destination FROM mail_aliases WHERE enabled = true AND (is_regex = 0 AND source_local = '%u' AND source_domain = '%d' OR is_regex = 1 AND CONCAT('%u', '@', '%d') REGEXP source);
