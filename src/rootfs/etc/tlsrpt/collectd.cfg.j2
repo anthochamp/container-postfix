@@ -1,0 +1,5 @@
+[tlsrpt_collectd]
+storage = sqlite:///var/lib/tlsrpt/collectd.sqlite
+socketname = /run/tlsrpt/collectd.socket
+socketmode = 0666
+log_level = {{ environ('POSTFIX_TLSRPT_LOG_LEVEL') }}
