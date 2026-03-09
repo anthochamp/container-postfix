@@ -19,8 +19,16 @@ FROM alpine:3.23.3@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f
 
 # hadolint ignore=DL3018
 RUN apk add --update --no-cache jinja2-cli supervisor stunnel \
-	postfix postfix-mysql postfix-pcre \
 	python3
+
+# renovate: datasource=repology depName=postfix versioning=loose
+ARG POSTFIX_VERSION=3.10.8-r0
+
+# hadolint ignore=DL3018
+RUN apk add --no-cache \
+	postfix="${POSTFIX_VERSION}" \
+	postfix-mysql="${POSTFIX_VERSION}" \
+	postfix-pcre="${POSTFIX_VERSION}"
 
 # Create tlsrpt user and directories
 RUN set -ex; \
@@ -47,8 +55,9 @@ COPY --chmod=640 \
 COPY --chmod=640 /rootfs/etc/stunnel/stunnel.conf.j2 /etc/stunnel/
 COPY --chmod=644 /rootfs/etc/supervisord.conf /etc/supervisord.conf
 COPY --chmod=644 /rootfs/etc/syslog.conf /etc/syslog.conf
-COPY --chmod=640 /rootfs/etc/tlsrpt/collectd.cfg.j2 /etc/tlsrpt/collectd.cfg.j2
-COPY --chmod=755 /rootfs/usr/local/bin/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN mkdir -m 755 /etc/tlsrpt
+COPY --chown=tlsrpt:tlsrpt --chmod=640 /rootfs/etc/tlsrpt/collectd.cfg.j2 /etc/tlsrpt/collectd.cfg.j2
+COPY --chmod=755 /rootfs/usr/local/bin/docker-entrypoint.sh /usr/local/bin/
 
 RUN set -ex; \
 	mkdir -p /run/stunnel; \
