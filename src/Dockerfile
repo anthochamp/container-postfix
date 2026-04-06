@@ -21,7 +21,8 @@ FROM alpine:3.23.3@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f
 RUN apk add --update --no-cache jinja2-cli supervisor stunnel \
 	python3
 
-# renovate: datasource=repology depName=postfix versioning=loose
+# renovate: datasource=repology depName=alpine_3_23/postfix versioning=loose
+# NOTE: when Alpine major version bumps (e.g. 3.23 → 3.24), update the depName prefix above
 ARG POSTFIX_VERSION=3.10.8-r0
 
 # hadolint ignore=DL3018
