@@ -1,5 +1,7 @@
 {
 	"private": true,
+	"description": "Postfix container for virtual mail hosting with MySQL, SASL, milter, SRS, and TLSRPT",
+	"author": "Anthony Champagne <dev@anthonychampagne.fr>",
 	"scripts": {
 		"test": "vitest run",
 		"tsc:check": "tsc -noEmit -p ./tsconfig.json",
