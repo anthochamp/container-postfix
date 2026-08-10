@@ -16,7 +16,7 @@
 		"@types/node": "24.11.0",
 		"@biomejs/biome": "2.4.5",
 		"tsx": "4.21.0",
-		"typescript": "5.9.3",
+		"typescript": "7.0.2",
 		"lefthook": "2.1.2",
 		"markdownlint-cli2": "0.21.0",
 		"is-ci": "4.1.0",
