@@ -1,4 +1,4 @@
-FROM alpine:3.23.3@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659 AS builder
+FROM alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b AS builder
 
 SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 
@@ -15,15 +15,15 @@ RUN set -ex; \
 	/opt/tlsrpt-venv/bin/pip install --no-cache-dir \
 	"https://github.com/sys4/tlsrpt-reporter/archive/refs/tags/v${TLSRPT_REPORTER_VERSION}.tar.gz"
 
-FROM alpine:3.23.3@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659
+FROM alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
 
 # hadolint ignore=DL3018
 RUN apk add --update --no-cache jinja2-cli supervisor stunnel \
 	python3
 
-# renovate: datasource=repology depName=alpine_3_23/postfix versioning=loose
-# NOTE: when Alpine major version bumps (e.g. 3.23 → 3.24), update the depName prefix above
-ARG POSTFIX_VERSION=3.10.12-r0
+# renovate: datasource=repology depName=alpine_3_24/postfix versioning=loose
+# NOTE: when Alpine version bumps, update the depName prefix above
+ARG POSTFIX_VERSION=3.11.5-r0
 
 # hadolint ignore=DL3018
 RUN apk add --no-cache \
