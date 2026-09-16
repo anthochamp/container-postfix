@@ -90,7 +90,7 @@ type ContainerRunOptions = Omit<
 >;
 
 export function initSuite() {
-	let mariadb: StartedTestContainer;
+	let mariadb: StartedTestContainer | undefined;
 	let dbPort: number;
 
 	let pendingRunOptions: ContainerRunOptions = {};
@@ -122,7 +122,7 @@ export function initSuite() {
 	});
 
 	afterAll(async () => {
-		await mariadb.stop();
+		await mariadb?.stop();
 	});
 
 	return {

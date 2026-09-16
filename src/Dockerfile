@@ -23,7 +23,7 @@ RUN apk add --update --no-cache jinja2-cli supervisor stunnel \
 
 # renovate: datasource=repology depName=alpine_3_24/postfix versioning=loose
 # NOTE: when Alpine version bumps, update the depName prefix above
-ARG POSTFIX_VERSION=3.11.5-r0
+ARG POSTFIX_VERSION=3.11.7-r0
 
 # hadolint ignore=DL3018
 RUN apk add --no-cache \
