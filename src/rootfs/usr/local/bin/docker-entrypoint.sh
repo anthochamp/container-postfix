@@ -229,4 +229,6 @@ for file in $j2Templates; do
 	chown "$(stat -c '%U:%G' "$file.j2")" "$file"
 done
 
+postfix check
+
 exec "$@"

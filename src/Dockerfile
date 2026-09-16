@@ -73,5 +73,6 @@ ENTRYPOINT ["docker-entrypoint.sh"]
 
 CMD [ "supervisord", "-c", "/etc/supervisord.conf" ]
 
+# postfix status logs via syslog on every check; master -t is equivalent without side effects
 HEALTHCHECK \
-	CMD postfix status || exit 1
+	CMD ! /usr/libexec/postfix/master -t 2>/dev/null
