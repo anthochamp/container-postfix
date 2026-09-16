@@ -1,84 +1,58 @@
-import { TcpClient } from "@ac-essentials/misc-util";
-import { expect, suite, test } from "vitest";
+import { SmtpClient } from "@ac-kit/net-smtp";
+import { DuplexTransport } from "@ac-kit/net-transport-node";
+import { TcpSocket } from "@ac-kit/node";
+import { expect, describe, it } from "vitest";
+
 import { initSuite } from "./common";
 
 // Conducts an SMTP EHLO handshake and returns all 250 extension lines.
 async function smtpEhlo(host: string, port: number): Promise<string[]> {
-	const client = TcpClient.from();
-	await client.connect(port, host);
-
-	return new Promise<string[]>((resolve, reject) => {
-		const lines: string[] = [];
-		let buffer = "";
-		let greeted = false;
-		let done = false;
-
-		const finish = (fn: () => void) => {
-			if (!done) {
-				done = true;
-				fn();
-			}
-		};
-
-		client.socket.on("data", (chunk) => {
-			buffer += chunk.toString();
-
-			let newlineIdx: number;
-			while ((newlineIdx = buffer.indexOf("\n")) !== -1) {
-				const line = buffer.slice(0, newlineIdx).replace(/\r$/, "");
-				buffer = buffer.slice(newlineIdx + 1);
-
-				if (!greeted && line.startsWith("220")) {
-					greeted = true;
-					void client.write("EHLO test.example.local\r\n");
-				} else if (greeted) {
-					lines.push(line);
-					if (line.startsWith("250 ")) {
-						void client.write("QUIT\r\n");
-						void client.end();
-						finish(() => resolve(lines));
-						return;
-					}
-					if (!line.startsWith("250")) {
-						void client.end();
-						finish(() => reject(new Error(`Unexpected SMTP line: ${line}`)));
-						return;
-					}
-				}
-			}
-		});
-
-		client.socket.on("error", (err) => finish(() => reject(err)));
-		client.socket.on("close", () =>
-			finish(() =>
-				reject(new Error("Connection closed before EHLO completed")),
-			),
-		);
+	const socket = TcpSocket.from();
+	const client = new SmtpClient(new DuplexTransport(socket.stream), {
+		defaultTimeoutMs: 5000,
 	});
+	const greeting = client.wait("push");
+	await socket.connect(port, { host });
+	await greeting;
+	try {
+		const response = await client.ehlo("test.example.local");
+		return response.lines;
+	} finally {
+		if (!socket.closed && !socket.destroyed) {
+			await client.quit();
+		}
+		if (!socket.closed && !socket.destroyed) {
+			await socket.end();
+		}
+	}
 }
 
-suite.sequential("smtp", () => {
-	const { startContainer } = initSuite();
+describe("smtp", () => {
+	const { useContainer } = initSuite();
 
-	test("advertises the default message size limit in EHLO", async () => {
-		const { smtpPort } = await startContainer();
+	describe("default message size limit", () => {
+		const { smtpPort } = useContainer();
 
-		const lines = await smtpEhlo("127.0.0.1", smtpPort);
-		const sizeLine = lines.find((l) => /^250[-\s]SIZE\b/.test(l));
+		it("advertises the default message size limit in EHLO", async () => {
+			const lines = await smtpEhlo("127.0.0.1", smtpPort);
+			const sizeLine = lines.find((l) => /^SIZE\b/.test(l));
 
-		expect(sizeLine).toBeDefined();
-		expect(sizeLine).toMatch(/SIZE 10485760/);
+			expect(sizeLine).toBeDefined();
+			expect(sizeLine).toMatch(/SIZE 10485760/);
+		});
 	});
 
-	test("advertises a custom message size limit set via POSTFIX_MESSAGE_SIZE_LIMIT", async () => {
-		const { smtpPort } = await startContainer({
-			env: { POSTFIX_MESSAGE_SIZE_LIMIT: "5242880" },
+	describe("POSTFIX_MESSAGE_SIZE_LIMIT=5242880", () => {
+		const { smtpPort } = useContainer({
+			POSTFIX_MESSAGE_SIZE_LIMIT: "5242880",
 		});
 
-		const lines = await smtpEhlo("127.0.0.1", smtpPort);
-		const sizeLine = lines.find((l) => /^250[-\s]SIZE\b/.test(l));
+		it("advertises the custom message size limit in EHLO", async () => {
+			const lines = await smtpEhlo("127.0.0.1", smtpPort);
+			const sizeLine = lines.find((l) => /^SIZE\b/.test(l));
 
-		expect(sizeLine).toBeDefined();
-		expect(sizeLine).toMatch(/SIZE 5242880/);
+			expect(sizeLine).toBeDefined();
+			expect(sizeLine).toMatch(/SIZE 5242880/);
+		});
 	});
 });
