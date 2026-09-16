@@ -84,7 +84,10 @@ async function isSmtpdReady(port: number): Promise<boolean> {
 	}
 }
 
-type ContainerRunOptions = Omit<DockerContainerRunOptions, "name" | "context" | "detach">;
+type ContainerRunOptions = Omit<
+	DockerContainerRunOptions,
+	"name" | "context" | "detach"
+>;
 
 export function initSuite() {
 	let mariadb: StartedTestContainer;
