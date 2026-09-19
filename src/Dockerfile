@@ -6,7 +6,7 @@ SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 RUN apk add --no-cache gcc musl-dev python3 python3-dev py3-pip
 
 # renovate: datasource=github-releases depName=sys4/tlsrpt-reporter
-ARG TLSRPT_REPORTER_VERSION=0.5.0
+ARG TLSRPT_REPORTER_VERSION=0.6.0
 
 # Install tlsrpt-reporter in venv
 RUN set -ex; \
